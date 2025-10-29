@@ -71,10 +71,11 @@ class Main extends Sprite
 
 	private function setupGame():Void
 	{
+		#if (openfl <= "9.2.0")
 		var stageWidth:Int = Lib.current.stage.stageWidth;
 		var stageHeight:Int = Lib.current.stage.stageHeight;
 
-		if (zoom == -1)
+		if (zoom == -1.0)
 		{
 			var ratioX:Float = stageWidth / gameWidth;
 			var ratioY:Float = stageHeight / gameHeight;
@@ -82,11 +83,10 @@ class Main extends Sprite
 			gameWidth = Math.ceil(stageWidth / zoom);
 			gameHeight = Math.ceil(stageHeight / zoom);
 		}
+		#end 
 
-		SUtil.check();
-	
 		ClientPrefs.loadDefaultKeys();
-		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
+		addChild(new FlxGame(gameWidth, gameHeight, #if (mobile && MODS_ALLOWED) !android.CopyState.checkExistingFiles() ? android.CopyState : #end initialState, #if (flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen));
 
 		fpsVar = new FPS(10, 3, 0xFFFFFF);
 		addChild(fpsVar);
@@ -142,11 +142,19 @@ class Main extends Sprite
 		Sys.println(errMsg);
 		Sys.println("Crash dump saved in " + Path.normalize(path));
 
-		Application.current.window.alert(errMsg, "Error!");
+		showPopUp(errMsg, "Error!");
 		#if desktop
 		DiscordClient.shutdown();
 		#end
 		Sys.exit(1);
 	}
 	#end
+    static function showPopUp(message:String, title:String):Void
+	{
+		#if android
+		android.Tools.showAlertDialog(title, message, {name: "OK", func: null}, null);
+		#else
+		FlxG.stage.window.alert(message, title);
+		#end
+	}
 }
