@@ -112,7 +112,10 @@ class SUtil
 	public static function getPath():String
 	{
 		#if android
-		return Environment.getExternalStorageDirectory() + '/' + '.' + Application.current.meta.get('file') + '/';
+		if (aDir != null && aDir.length > 0)
+			return aDir;
+		else
+			return aDir = Sys.getCwd();
 		#else
 		return '';
 		#end
